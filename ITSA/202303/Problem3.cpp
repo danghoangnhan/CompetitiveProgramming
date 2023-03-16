@@ -17,8 +17,13 @@ int main(){
         if (bonus>0)
         {   
             if(bonus<500)bonus = 500;
-            result += (bonus/500)*5;
-            result += (bonus%500)*5;
+            while (bonus>0)
+            {
+                result +=5;
+                bonus-=500;
+                cout<<"bonus:"<<bonus<<endl;
+            }
+            
         }
         cout <<result<<endl;
     }
