@@ -21,7 +21,6 @@ int main(){
             {
                 result +=5;
                 bonus-=500;
-                cout<<"bonus:"<<bonus<<endl;
             }
             
         }
