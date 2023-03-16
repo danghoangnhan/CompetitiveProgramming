@@ -14,7 +14,6 @@ int main(){
         result=70;
         cin>>sample;
         int bonus = sample - 1500;
-        cout<<"bonus:"<<bonus<<endl;
         if (bonus>0)
         {   
             if(bonus<500)bonus = 500;
