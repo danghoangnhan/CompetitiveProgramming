@@ -20,6 +20,5 @@ int main(){
         }
         cout<<population[k][0]<<endl;
     }
-
     return 0;
 }
