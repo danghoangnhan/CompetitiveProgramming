@@ -1,0 +1,3 @@
+#!/bin/sh
+PATH="$PATH:/usr/local/sdkman/candidates/kotlin/current/bin"
+kotlinc -d . -jvm-target 1.8 verifyE.kt
