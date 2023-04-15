@@ -62,6 +62,7 @@ vector<int> split(string line,string delimiter){
     result.push_back(stoi(line));
     return result;
 }
+
 int main(){
     vector<Product>ProductList;
     string input;
