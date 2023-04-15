@@ -9,6 +9,10 @@ int main(){
     vector<int>result(3,0);
     vector<int>coins={10,5,1};
     int length;
+    
+    freopen("./input/Problem2.in", "r", stdin);
+    freopen("./output/Problem2.out","w",stdout);
+
     cin>>length;
     for(int i=0;i<coins.size();i++){
         result[i] =length/coins[i];
