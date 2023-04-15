@@ -33,16 +33,16 @@ string showId(){
 bool Compare(const Product& a, const Product& b) 
 { 
    if (a.profit < b.profit) return false;
-   if (b.profit > a.profit) return true;
+   if (b.profit < a.profit) return true;
 
    if (a.cost > b.cost) return true;
-   if (b.cost < a.cost) return false;
+   if (b.cost > a.cost) return false;
 
    if (a.weight > b.weight) return true;
-   if (b.weight < a.weight) return false;
+   if (b.weight > a.weight) return false;
 
    if (a.expired > b.expired) return true;
-   if (b.expired < a.expired) return false;
+   if (b.expired > a.expired) return false;
 
    if (a.id < b.id) return true;
    if (b.id < a.id) return false;
