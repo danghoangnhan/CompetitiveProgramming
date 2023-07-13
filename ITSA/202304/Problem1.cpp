@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 using namespace std;
+
 int main(){
     int cases,row,column;
     vector<vector<int>> mapper(102,vector<int>(102,0));
