@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from .base import Scraper
+from .itsa import ItsaScraper
 
-# Concrete scrapers append themselves as they are added.
-SCRAPERS: list[Scraper] = []
+SCRAPERS: list[Scraper] = [ItsaScraper()]
 
 __all__ = ["Scraper", "SCRAPERS"]
