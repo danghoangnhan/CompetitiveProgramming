@@ -22,32 +22,53 @@ def _parse_dt(text: str) -> datetime | None:
     text = text.strip()
     if not text:
         return None
-    # Format observed: "2026-05-01 10:00:00 +0800"
-    try:
-        return datetime.strptime(text, "%Y-%m-%d %H:%M:%S %z")
-    except ValueError:
-        return None
+    # Real listing format: "2025-10-07 08:50" (no seconds, no tz)
+    for fmt in ("%Y-%m-%d %H:%M:%S %z", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"):
+        try:
+            return datetime.strptime(text, fmt)
+        except ValueError:
+            continue
+    return None
 
 
 def parse_listing(html: str, *, base_url: str = TIOJ_BASE) -> list[Contest]:
+    """Parse the TIOJ contest listing page.
+
+    Real page structure (per live fixture 2026-05-14):
+      cells[0] = contest title (plain text)
+      cells[1] = "View" link; href is /contests/<id> or /single_contest/<id>
+      cells[2] = status
+      cells[3] = start time  (format "YYYY-MM-DD HH:MM")
+      cells[4] = duration    (format "H:MM")
+      cells[5] = style
+      cells[6] = dashboard
+    Only rows whose View link points to /contests/<id> are scraped.
+    """
     soup = BeautifulSoup(html, "lxml")
     out: list[Contest] = []
     for row in soup.select("table.table tr"):
-        a = row.select_one("td a[href^='/contests/']")
+        cells = row.find_all("td")
+        if len(cells) < 4:
+            continue
+        # Title is the plain text of the first cell
+        title = cells[0].get_text(strip=True)
+        if not title:
+            continue
+        # Contest link is in cells[1]; only /contests/<id> paths are tracked
+        a = cells[1].find("a", href=True)
         if not a:
             continue
         href = str(a.get("href", "")).strip()
-        contest_id = href.rsplit("/", 1)[-1]
-        cells = row.find_all("td")
-        if len(cells) < 3:
+        if not href.startswith("/contests/"):
             continue
+        contest_id = href.rsplit("/", 1)[-1]
         out.append(Contest(
             source="tioj",
             source_id=f"contest-{contest_id}",
-            title=a.get_text(strip=True),
+            title=title,
             url=urljoin(base_url + "/", href.lstrip("/")),
-            start_time=_parse_dt(cells[1].get_text()),
-            end_time=_parse_dt(cells[2].get_text()),
+            start_time=_parse_dt(cells[3].get_text()),
+            end_time=None,
             registration_url=None,
             problems=[],
         ))
@@ -55,12 +76,15 @@ def parse_listing(html: str, *, base_url: str = TIOJ_BASE) -> list[Contest]:
 
 
 def parse_contest_detail(html: str, *, base_url: str = TIOJ_BASE) -> list[Problem]:
+    """Parse a TIOJ contest detail page.
+
+    Real page structure (per live fixture 2026-05-14):
+      The "Tasks" panel contains plain <a href="/contests/<id>/problems/<pid>">
+      links separated by <br> tags — there is no problem-list table.
+    """
     soup = BeautifulSoup(html, "lxml")
     problems: list[Problem] = []
-    for row in soup.select("table.problem-list tr"):
-        a = row.select_one("td a[href^='/problems/']")
-        if not a:
-            continue
+    for a in soup.select("a[href*='/problems/']"):
         href = str(a.get("href", "")).strip()
         problems.append(Problem(
             title=a.get_text(strip=True),
