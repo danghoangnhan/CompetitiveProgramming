@@ -1,5 +1,6 @@
-from datetime import datetime, timezone
-from bot.models import Contest, Problem, TrackedEntry, State
+import pytest
+
+from bot.models import Contest, Problem, State, TrackedEntry
 
 
 def test_problem_defaults():
@@ -35,6 +36,5 @@ def test_state_roundtrip_through_dict():
 
 
 def test_state_from_dict_rejects_unknown_version():
-    import pytest
     with pytest.raises(ValueError, match="unsupported state version"):
         State.from_dict({"version": 99, "entries": {}})
