@@ -17,11 +17,11 @@ def _fmt_dt(dt: datetime) -> str:
 
 
 def _problem_row(p: Problem, idx: int) -> str:
-    number = idx + 1
+    letter = chr(ord("A") + idx) if idx < 26 else str(idx + 1)
     link = f"[{p.title}]({p.url})"
     difficulty = p.difficulty if p.difficulty else "—"
     tags = ", ".join(p.tags) if p.tags else "—"
-    return f"| {number} | {p.title} {link} | {difficulty} | {tags} |"
+    return f"| {letter} | {link} | {difficulty} | {tags} |"
 
 
 def render_issue_body(contest: Contest, *, now_iso: str) -> str:

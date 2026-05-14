@@ -47,7 +47,7 @@ def test_body_problem_table_links_each_problem():
 def test_body_omits_difficulty_and_tags_when_absent():
     body = render_issue_body(make_contest(), now_iso="2026-05-14T02:00:00Z")
     # B has no difficulty or tags — its row should show em-dashes
-    assert "| B. Tree DP" in body
+    assert "[B. Tree DP](https://itsa.org.tw/p/2)" in body
     assert "| — | — |" in body
 
 
