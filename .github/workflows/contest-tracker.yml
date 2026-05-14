@@ -1,0 +1,33 @@
+name: contest-tracker
+
+on:
+  schedule:
+    - cron: "0 2 * * *"        # 02:00 UTC = 10:00 Asia/Taipei
+  workflow_dispatch: {}
+
+permissions:
+  issues: write
+  contents: write
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install bot
+        run: pip install -e bot/
+      - name: Run tracker
+        run: python -m bot.main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+      - name: Commit state changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "bot: update tracked_contests.json"
+          file_pattern: "data/tracked_contests.json"
+          commit_user_name: "contest-tracker-bot"
+          commit_user_email: "bot@users.noreply.github.com"
