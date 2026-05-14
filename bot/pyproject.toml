@@ -35,3 +35,12 @@ python_version = "3.12"
 module = ["bs4", "bs4.*", "lxml", "lxml.*"]
 ignore_missing_imports = true
 follow_imports = "silent"
+
+[[tool.mypy.overrides]]
+module = ["bot.tests.*", "tests.*"]
+disallow_untyped_defs = false
+disallow_incomplete_defs = false
+disallow_untyped_calls = false
+warn_return_any = false
+disallow_any_generics = false
+warn_unused_ignores = false
