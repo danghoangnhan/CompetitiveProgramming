@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import time
 from datetime import datetime
+from typing import Callable, Iterable
 from zoneinfo import ZoneInfo
+
+import httpx
 
 from .models import Contest, Problem
 
@@ -48,3 +52,34 @@ def render_issue_body(contest: Contest, *, now_iso: str) -> str:
         "Edit freely — the bot only creates, it does not overwrite.*",
     ])
     return "\n".join(lines) + "\n"
+
+
+def create_issue(
+    client: httpx.Client,
+    repo: str,
+    token: str,
+    title: str,
+    body: str,
+    labels: Iterable[str],
+    *,
+    max_attempts: int = 3,
+    sleep: Callable[[float], None] = time.sleep,
+) -> int:
+    """POST a new issue. Retries on 5xx with exponential backoff. Returns issue number."""
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+    payload = {"title": title, "body": body, "labels": list(labels)}
+    last_status: int | None = None
+    for attempt in range(1, max_attempts + 1):
+        r = client.post(f"/repos/{repo}/issues", json=payload, headers=headers, timeout=30.0)
+        last_status = r.status_code
+        if r.status_code == 201:
+            return int(r.json()["number"])
+        if 400 <= r.status_code < 500:
+            raise RuntimeError(f"GitHub create_issue failed: {r.status_code} {r.text}")
+        if attempt < max_attempts:
+            sleep(2.0 ** (attempt - 1))
+    raise RuntimeError(f"GitHub create_issue failed after {max_attempts} attempts (last status {last_status})")
