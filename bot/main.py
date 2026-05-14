@@ -27,7 +27,13 @@ CreateIssueFn = Callable[..., int]
 @dataclass
 class Summary:
     new_issues: list[tuple[str, int]] = field(default_factory=list)
-    failures: list[tuple[str, str]] = field(default_factory=list)
+    fetch_failures: list[tuple[str, str]] = field(default_factory=list)
+    create_failures: list[tuple[str, str]] = field(default_factory=list)
+
+    @property
+    def failures(self) -> list[tuple[str, str]]:
+        """Combined view for callers/tests that don't care about the distinction."""
+        return self.fetch_failures + self.create_failures
 
 
 def run(
@@ -47,7 +53,7 @@ def run(
             contests = scraper.fetch()
         except Exception as e:                       # noqa: BLE001
             log.error("[%s] fetch failed: %s", scraper.source, e)
-            summary.failures.append((scraper.source, str(e)))
+            summary.fetch_failures.append((scraper.source, str(e)))
             continue
 
         for contest in contests:
@@ -65,7 +71,7 @@ def run(
             except Exception as e:                   # noqa: BLE001
                 log.error("[%s] create_issue failed for %s: %s",
                           contest.source, contest.key, e)
-                summary.failures.append((contest.source, str(e)))
+                summary.create_failures.append((contest.source, str(e)))
                 continue
             state.entries[contest.key] = TrackedEntry(issue_number=issue_number,
                                                      tracked_at=now_iso)
@@ -96,9 +102,12 @@ def main() -> int:
         token=token,
         now_iso=now_iso,
     )
-    log.info("new issues: %s", summary.new_issues)
-    log.info("failures:   %s", summary.failures)
-    if summary.failures and len(summary.failures) >= len(list(SCRAPERS)):
+    log.info("new issues:      %s", summary.new_issues)
+    log.info("fetch failures:  %s", summary.fetch_failures)
+    log.info("create failures: %s", summary.create_failures)
+
+    scrapers_failed_fetch = {source for source, _ in summary.fetch_failures}
+    if scrapers_failed_fetch and len(scrapers_failed_fetch) >= len(SCRAPERS):
         return 1
     return 0
 
