@@ -1,5 +1,10 @@
 from __future__ import annotations
 
+# Network gap (captured 2026-05-15): e-tutor.itsa.org.tw and itsa.org.tw both
+# return Cloudflare error 522 (origin connection timeout) from this environment.
+# The selectors below are therefore synthetic until a live capture succeeds.
+# Retry: curl --max-time 30 "https://e-tutor.itsa.org.tw/e-Tutor/course/category.php?id=716"
+
 import time
 from datetime import datetime
 from typing import Callable
