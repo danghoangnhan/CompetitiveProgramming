@@ -1,10 +1,12 @@
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 
 from bot.scrapers.tioj import TiojScraper, parse_listing, parse_contest_detail
 
 LISTING = Path(__file__).parent / "fixtures" / "tioj_synthetic_listing.html"
 DETAIL = Path(__file__).parent / "fixtures" / "tioj_synthetic_contest.html"
+
+_TAIPEI = timezone(timedelta(hours=8))
 
 
 def test_parse_listing_yields_two_contests() -> None:
@@ -16,8 +18,8 @@ def test_parse_listing_yields_two_contests() -> None:
     assert c.source_id == "contest-98"
     assert c.title == "全國賽考古題"
     assert c.url == "https://tioj.ck.tp.edu.tw/contests/98"
-    # Real listing format: "YYYY-MM-DD HH:MM" — naive datetime (no tz in HTML)
-    assert c.start_time == datetime(2026, 5, 1, 10, 0)
+    # Naive HTML datetimes must be tagged Asia/Taipei; fixed-offset +08:00 compares equal
+    assert c.start_time == datetime(2026, 5, 1, 10, 0, tzinfo=_TAIPEI)
     # Real page has no end-time column — only duration
     assert c.end_time is None
     # Detail not fetched at listing parse → problems empty until fetch step

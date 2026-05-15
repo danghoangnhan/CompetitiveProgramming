@@ -4,6 +4,7 @@ import time
 from datetime import datetime
 from typing import Callable
 from urllib.parse import urljoin
+from zoneinfo import ZoneInfo
 
 import httpx
 from bs4 import BeautifulSoup
@@ -16,16 +17,23 @@ USER_AGENT = (
 )
 TIOJ_BASE = "https://tioj.ck.tp.edu.tw"
 TIOJ_LISTING = f"{TIOJ_BASE}/contests"
+TAIPEI = ZoneInfo("Asia/Taipei")
 
 
 def _parse_dt(text: str) -> datetime | None:
     text = text.strip()
     if not text:
         return None
-    # Real listing format: "2025-10-07 08:50" (no seconds, no tz)
-    for fmt in ("%Y-%m-%d %H:%M:%S %z", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"):
+    # tz-aware format first — keep its parsed offset
+    for fmt in ("%Y-%m-%d %H:%M:%S %z",):
         try:
             return datetime.strptime(text, fmt)
+        except ValueError:
+            continue
+    # naive formats — assume Asia/Taipei since TIOJ is a Taiwan-hosted site
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M"):
+        try:
+            return datetime.strptime(text, fmt).replace(tzinfo=TAIPEI)
         except ValueError:
             continue
     return None
