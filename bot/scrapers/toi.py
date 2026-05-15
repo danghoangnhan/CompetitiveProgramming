@@ -14,8 +14,7 @@ USER_AGENT = (
     "contest-tracker-bot/1.0 "
     "(+https://github.com/danghoangnhan/CompetitiveProgramming)"
 )
-# Engineer: confirm and replace before merging — see Task 13 note.
-TOI_LISTING_URL = "https://toi.example.tw/archive"
+TOI_LISTING_URL = "https://tpmso.org/toi/"
 TAIPEI = ZoneInfo("Asia/Taipei")
 
 
