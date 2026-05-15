@@ -34,7 +34,9 @@ def test_parse_contest_detail_two_problems():
     assert problems[0].url == "https://zerojudge.tw/ShowProblem?problemid=a001"
 
 
-def test_scraper_source_and_registered():
+def test_scraper_disabled_by_default_but_importable():
     from bot.scrapers import SCRAPERS
-    assert any(s.source == "zerojudge" for s in SCRAPERS)
+    # Intentionally NOT in default SCRAPERS — detail pages require login.
+    assert not any(s.source == "zerojudge" for s in SCRAPERS)
+    # But the class can still be instantiated for users who want to provide auth.
     assert ZeroJudgeScraper().source == "zerojudge"
