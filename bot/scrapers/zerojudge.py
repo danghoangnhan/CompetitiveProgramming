@@ -5,6 +5,7 @@ import time
 from datetime import datetime
 from typing import Callable
 from urllib.parse import urljoin
+from zoneinfo import ZoneInfo
 
 import httpx
 from bs4 import BeautifulSoup
@@ -18,6 +19,8 @@ USER_AGENT = (
 ZEROJUDGE_BASE = "https://zerojudge.tw"
 ZEROJUDGE_LISTING = f"{ZEROJUDGE_BASE}/Contests"
 
+TAIPEI = ZoneInfo("Asia/Taipei")
+
 # Real ZeroJudge listing format: "YYYY-MM-DD HH:MM:SS.0"
 _START_RE = re.compile(r"開始時間[：:]\s*(\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2})")
 
@@ -27,7 +30,7 @@ def _parse_start(text: str) -> datetime | None:
     if not m:
         return None
     try:
-        return datetime.strptime(m.group(1).strip(), "%Y-%m-%d %H:%M:%S")
+        return datetime.strptime(m.group(1).strip(), "%Y-%m-%d %H:%M:%S").replace(tzinfo=TAIPEI)
     except ValueError:
         return None
 

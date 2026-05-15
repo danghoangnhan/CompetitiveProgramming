@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from bot.scrapers.zerojudge import (
     ZeroJudgeScraper,
@@ -19,8 +20,8 @@ def test_parse_listing_two_contests():
     assert c.source_id == "contest-500"
     assert c.title == "2026 校際模擬賽"
     assert c.url == "https://zerojudge.tw/ShowContest?contestid=500"
-    # Real ZeroJudge listing has naive datetime (no tz info in HTML)
-    assert c.start_time == datetime(2026, 5, 15, 14, 0, 0)
+    # ZeroJudge times are in Asia/Taipei; scraper tags them accordingly
+    assert c.start_time == datetime(2026, 5, 15, 14, 0, 0, tzinfo=ZoneInfo("Asia/Taipei"))
     # No end time available in listing
     assert c.end_time is None
     assert c.problems == []
